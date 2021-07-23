@@ -10,15 +10,13 @@
 #define MAX_ARRAY_SIZE (100)
 
 const u_long size = 100;
-//float matrix[size][size];
 float matrixOne[MAX_ARRAY_SIZE * MAX_ARRAY_SIZE];
 float vector[MAX_ARRAY_SIZE];
 float outputVector[MAX_ARRAY_SIZE];
 
 int main()
 {
-
-    perror("Okey srarting ");//===========================
+    perror("Okay starting ");
     cl_device_id device_id = NULL;
     cl_context context = NULL;
     cl_command_queue command_queue = NULL;
@@ -36,7 +34,6 @@ int main()
     cl_int ret2;
     cl_int ret3;
 
-    
     char string[MEM_SIZE];
     
     FILE *fp;
@@ -78,52 +75,45 @@ int main()
     //command_queue = clCreateCommandQueue(context, device_id, 0, &ret); ----------- is deprecated
     command_queue = clCreateCommandQueueWithProperties(context, device_id, 0, &ret);
 
-
-
-
     for (int i = 0; i < size; i++)
     {
         matrixOne[i* size + i]=1;
         vector[i]=i;
     }
 
-    perror("Okey create matrix");//=======================================
+    perror("Okay create matrix");
 
     /* Create Memory Buffer */
     memobjMatrix = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, size * size * sizeof(float), matrixOne, &ret1);
     if(ret1 != CL_SUCCESS)
     {
-        printf("%s  %d\n","Cant create matrix buffer",ret1);
+        printf("Can't create matrix buffer %d\n",ret1);
         exit(1);
     }
 
-    perror("Okey create buffer matrix");
+    perror("Create buffer matrix\n");
     memobjVector = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, size * sizeof(float), vector, &ret2);
     if(ret2 != CL_SUCCESS)
     {
-        printf("%s","Cant create vector buffer");
+        printf("Can't create vector buffer");
         exit(1);
     }
     memobjOutputVector = clCreateBuffer(context, CL_MEM_READ_ONLY, size * sizeof(float), NULL, &ret3);
     if(ret3 != CL_SUCCESS)
     {
-        printf("%s","Cant create outputVector buffer");
+        printf("Can't create outputVector buffer");
         exit(1);
     }
-
-
-    //memobj = clCreateBuffer(context, CL_MEM_READ_WRITE,MEM_SIZE * sizeof(char), NULL, &ret);
     
     /* Create Kernel Program from the source */
     program = clCreateProgramWithSource(context, 1, (const char **)&source_str,
     (const size_t *)&source_size, &ret);
     if(ret != CL_SUCCESS)
     {
-        printf("%s  %d\n","Cant create programm source",ret);
+        printf("Can't create programm source %d\n",ret);
         exit(1);
     }
-
-    perror("Okey create programm with sourse");
+    perror("Okay,create programm with sourse");
     
     /* Build Kernel Program */
     ret = clBuildProgram(program, 1, &device_id, NULL, NULL, NULL);
@@ -139,65 +129,56 @@ int main()
         // Get the log
         clGetProgramBuildInfo(program, device_id, CL_PROGRAM_BUILD_LOG, log_size, log, NULL);
         
-
         // Print the log
         printf("%s\n", log);
     }
-    // if(ret!=CL_SUCCESS){
-    //     printf("%s %d","error3",ret);
-    //     exit(0);
-
-    // }
     
     /* Create OpenCL Kernel */
     kernel = clCreateKernel(program, "getMatrixSum", &ret);
     if(ret != CL_SUCCESS)
     {
-        printf("%s  %d\n","Cant create programm kernel",ret);
+        printf("Can't create programm kernel %d\n",ret);
         exit(1);
     }
 
-    perror("Okey create opencl kernel");
+    perror("Okay, create opencl kernel");
 
-    
     /* Set OpenCL Kernel Parameters */
     ret1 = clSetKernelArg(kernel, 0, sizeof(cl_mem), (void *)&memobjMatrix);
     if(ret1 != CL_SUCCESS)
     {
-        printf("%s  %d\n","Cant create set kernel parameter 0",ret1);
+        printf("Can't create set kernel parameter 0 %d\n",ret1);
         exit(1);
 
     }
     ret2 = clSetKernelArg(kernel, 1, sizeof(cl_mem), (void *)&memobjVector);
     if(ret2 != CL_SUCCESS)
     {
-        printf("%s  %d\n","Cant create set kernel parameter 1",ret2);
+        printf("Can't create set kernel parameter 1 %d\n", ret2);
         exit(1);
 
     }
     ret3 = clSetKernelArg(kernel, 2, sizeof(cl_mem), (void *)&memobjOutputVector);
-    if(ret3!=CL_SUCCESS){
-        printf("%s  %d\n","Cant create set kernel parameter 2",ret3);
+    if(ret3!=CL_SUCCESS)
+    {
+        printf("Can't create set kernel parameter 2 %d\n", ret3);
         exit(1);
 
     }
     ret3 = clSetKernelArg(kernel, 3, sizeof(u_long),(void*)&size);
     if(ret3 != CL_SUCCESS)
     {
-        printf("%s  %d\n","Cant create set kernel arg",ret3);
+        printf("Can't create set kernel arg %d\n", ret3);
         exit(1);
 
     }
 
-    perror("Okey set kernel parameters");//---------------------------------------
-
-
-
+    perror("Okay, set kernel parameters");
 
     /* Execute OpenCL Kernel */
     // ret = clEnqueueTask(command_queue, kernel, 0, NULL,NULL);
     // if(ret!=CL_SUCCESS){
-    //     printf("%s  %d\n","Cant enque task",ret);
+    //     printf("Can't enque task %d\n",ret);
     //     exit(1);
     // }
 
@@ -205,30 +186,30 @@ int main()
     ret = clEnqueueNDRangeKernel(command_queue, kernel, 1, 0, &size, 0, 0, 0, 0);
     if(ret != CL_SUCCESS)
     {
-        printf("%s  %d\n","Cant enque task",ret);
+        printf("Can't enque task %d\n", ret);
         exit(1);
     }
 
-    perror("Okey execute opencl kernel");
+    perror("Okay, execute opencl kernel");
 
     /* Copy results from the memory buffer */
     ret = clEnqueueReadBuffer(command_queue, memobjOutputVector, CL_TRUE, 0,
     sizeof(float) *size,outputVector, 0, NULL, NULL);
     if(ret != CL_SUCCESS)
     {
-        printf("%s  %d\n","Cant enque read buffer",ret);
+        printf("Can't enque read buffer %d\n",ret);
         exit(1);
     }
 
     sleep(3);
 
-    perror("Okey reading results from memory");
+    perror("Okay, reading results from memory");
 
     /* Display Result */
     //puts();
     for (int i = 0; i < size; i++)
     {
-        printf("%f ",outputVector[i]);
+        printf("%f ", outputVector[i]);
     }
 
     perror("print result---------------------");
